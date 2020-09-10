@@ -4,8 +4,8 @@ refer: http://s-kawakami.hatenablog.jp/entry/2017/05/21/032253
 
 user.json
 {
-  "username": "username",
-  "password": "pass",
+  "username": "くらしTEPCO:ID",
+  "password": "くらしTEPCO:パスワード,
   "requestspath": "/requests-2.7.0"
 }
 
