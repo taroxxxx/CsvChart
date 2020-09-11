@@ -106,6 +106,42 @@ def db_execute_sql_cmd_args(
     return result
 
 
+def db_execute_sql_cmd_args_list(
+    sqlite_file_path,
+    sql_cmd_args_list,
+    text_factory=sqlite3.OptimizedUnicode
+):
+    """
+    # sqlite_file_path の connect を返します
+    s@sqlite_file_path : .sqlite
+    s[]@sql_cmd_args_list : [ [sql_cmd_args], ... ]
+    """
+
+    sql_connect = db_connect_db( sqlite_file_path )
+    sql_connect.text_factory = text_factory
+
+    result = 0
+
+    try:
+        for sql_cmd_args in sql_cmd_args_list:
+            sql_connect.execute( *sql_cmd_args )
+        sql_connect.commit()
+        result = 1
+
+    except sqlite3.OperationalError:
+        logging.warning( traceback.format_exc() )
+        logging.warning( sql_cmd_args )
+
+    except:
+        logging.error( traceback.format_exc() )
+
+    finally:
+        if sql_connect != None:
+            sql_connect.close()
+
+    return result
+
+
 def db_create_table(
     sqlite_file_path,
     tbl_name,
@@ -162,6 +198,27 @@ def db_create_table(
                 db_execute_sql_cmd_args( sqlite_file_path, [ sql_cmd ] )
 
     return 1
+
+
+def db_get_insert_data_cmd_args(
+    tbl_name,
+    tbl_data_list
+):
+    """
+    # tbl_data_list を tbl_name に INSERT
+    s@tbl_name :
+    s[]@tbl_data_list : [ [ data_name, value ], ... ]
+    """
+
+    col_list = [ data[0] for data in tbl_data_list ]
+    col_str = ', '.join( col_list )
+
+    val_tmp_list = [ '?' for data in tbl_data_list ]
+    val_tmp_str = ', '.join( val_tmp_list )
+
+    sql_cmd_tmp = 'INSERT INTO {0} ( {1} ) VALUES ( {2} );'.format( tbl_name, col_str, val_tmp_str )
+
+    return [ sql_cmd_tmp, [ data[1] for data in tbl_data_list ] ]
 
 
 def db_insert_data(
