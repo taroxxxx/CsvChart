@@ -2,7 +2,7 @@
 #!/usr/bin/env python
 
 """
-.. note::
+datalog.sqlite からチャートを作成
 """
 
 import os
@@ -385,7 +385,7 @@ function drawChart() {{
             pass
 
         chart_start_time = int( _lib.datetime_to_time( datetime.datetime( 2019,11,1 ) ) )
-        chart_end_time = int( _lib.datetime_to_time( datetime.datetime( 2020,9,8 ) ) )
+        chart_end_time = int( _lib.datetime_to_time( datetime.datetime( 2020,10,9 ) ) )
         interval_min = int( 60*24 ) # 1day
 
         kwh_temp_datarow_list = get_datarow_list( chart_start_time, chart_end_time, interval_min, mode='kwh_temp' )

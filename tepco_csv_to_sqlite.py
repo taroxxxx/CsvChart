@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """
+くらしTEPCO から .csv を取得して sqlite に登録
+
+
 refer: http://s-kawakami.hatenablog.jp/entry/2017/05/21/032253
 
 user.json
@@ -46,6 +49,14 @@ import _sqlite
 if __name__ == '__main__':
 
     try:
+
+        """
+        dayly: 2019/11 ~ 2020/8
+        hourly: 2020/7 ~ 2020/8
+        """
+        year_list = [ 2020 ]
+        month_list = [ 10,11,12 ] #range( 1, 8+1, 1 )
+        day_list = [ None ] #range( 1,31+1,1) #
 
         def update_tgt_time_kwh( db_file_path, tbl_name, tgt_time, kwh, mode ):
 
@@ -127,87 +138,83 @@ if __name__ == '__main__':
 
         def ___range___():
             pass
-        """
-        dayly: 2019/11 ~ 2020/8
-        hourly: 2020/7 ~ 2020/8
-        """
-        year = 2020
-        month_list = [ 7 ] #range( 1, 8+1, 1 )
-        day_list = [ None ] #range( 1,31+1,1) #
 
         # URL を組み立てて CSV データを取ってくる
-        csv_url_head = 'https://www.kurashi.tepco.co.jp/pf/ja/pc/mypage/learn/comparison.page?ReqID=CsvDL&year={0}'
-        csv_url_head = csv_url_head.format( year )
+        csv_url_head_tmp = 'https://www.kurashi.tepco.co.jp/pf/ja/pc/mypage/learn/comparison.page?ReqID=CsvDL&year={0}'
 
-        for month in month_list:
+        for year in year_list:
 
-            for day in day_list:
+            csv_url_head = csv_url_head_tmp.format( year )
 
-                mode = 1 if ( day != None ) else 0 # 0=dayly 1=hourly
+            for month in month_list:
 
-                if mode:
-                    csv_url = '{0}&month={1:02d}&day={2:02d}'.format( csv_url_head, month, day )
-                else:
-                    csv_url = '{0}&month={1:02d}'.format( csv_url_head, month )
+                for day in day_list:
 
-                print csv_url
-
-                csvgetheader = {
-                    'Referer': 'https://www.kurashi.tepco.co.jp/pf/ja/pc/mypage/learn/comparison.page',
-                }
-                csvdata = session.get( csv_url, headers=csvgetheader )
-                lines = _lib.unicode_csv_reader( io.StringIO( initial_value=csvdata.text ) )
-
-                for id, line in enumerate( lines ):
-
-                    if id == 0:
-                        continue # columun 列 除外
-
-                    date_strs = line[4].split() # ####/##/## 00:00
-
-                    ymd = date_strs[0].split( '/' )  # ####/##/##
-                    cur_year = int( ymd[0] )
-                    cur_month = int( ymd[1] )
-                    cur_day = int( ymd[2] )
-
-                    cur_hour = 0
-                    cur_min = 0
+                    mode = 1 if ( day != None ) else 0 # 0=dayly 1=hourly
 
                     if mode:
+                        csv_url = '{0}&month={1:02d}&day={2:02d}'.format( csv_url_head, month, day )
+                    else:
+                        csv_url = '{0}&month={1:02d}'.format( csv_url_head, month )
 
-                        hm = date_strs[1].split( ':' ) # 00:00
-                        cur_hour = int( hm[0] )
-                        cur_min = int( hm[1] )
+                    print csv_url
 
-                    if line[8] == '---': # NoData
-                        continue
+                    csvgetheader = {
+                        'Referer': 'https://www.kurashi.tepco.co.jp/pf/ja/pc/mypage/learn/comparison.page',
+                    }
+                    csvdata = session.get( csv_url, headers=csvgetheader )
+                    lines = _lib.unicode_csv_reader( io.StringIO( initial_value=csvdata.text ) )
 
-                    kwh = float( line[8] )
+                    for id, line in enumerate( lines ):
 
-                    tmp_hour = cur_hour
-                    if cur_hour == 24:
-                        tmp_hour = 23 # hout = 0-23
+                        if id == 0:
+                            continue # columun 列 除外
 
-                    cur_d = datetime.datetime(
-                        cur_year, cur_month, cur_day,
-                        tmp_hour, cur_min, 0
-                    )
+                        date_strs = line[4].split() # ####/##/## 00:00
 
-                    if cur_hour == 24:
-                        cur_d += datetime.timedelta( minutes=60 )
+                        ymd = date_strs[0].split( '/' )  # ####/##/##
+                        cur_year = int( ymd[0] )
+                        cur_month = int( ymd[1] )
+                        cur_day = int( ymd[2] )
 
-                    tgt_time = int( _lib.datetime_to_time( cur_d ) )
+                        cur_hour = 0
+                        cur_min = 0
 
-                    # 同じ日付のデータがあったら更新
-                    update_tgt_time_kwh( db_file_path, kwh_tbl_name, tgt_time, kwh, mode )
+                        if mode:
 
-                    tbl_data_list = [
-                        ( 'TIME', tgt_time ),
-                        ( 'MODE', mode ),
-                        ( 'KWH', kwh ),
-                    ]
+                            hm = date_strs[1].split( ':' ) # 00:00
+                            cur_hour = int( hm[0] )
+                            cur_min = int( hm[1] )
 
-                    _sqlite.db_insert_data( db_file_path, kwh_tbl_name, tbl_data_list )
+                        if line[8] == '---': # NoData
+                            continue
+
+                        kwh = float( line[8] )
+
+                        tmp_hour = cur_hour
+                        if cur_hour == 24:
+                            tmp_hour = 23 # hout = 0-23
+
+                        cur_d = datetime.datetime(
+                            cur_year, cur_month, cur_day,
+                            tmp_hour, cur_min, 0
+                        )
+
+                        if cur_hour == 24:
+                            cur_d += datetime.timedelta( minutes=60 )
+
+                        tgt_time = int( _lib.datetime_to_time( cur_d ) )
+
+                        # 同じ日付のデータがあったら更新
+                        update_tgt_time_kwh( db_file_path, kwh_tbl_name, tgt_time, kwh, mode )
+
+                        tbl_data_list = [
+                            ( 'TIME', tgt_time ),
+                            ( 'MODE', mode ),
+                            ( 'KWH', kwh ),
+                        ]
+
+                        _sqlite.db_insert_data( db_file_path, kwh_tbl_name, tbl_data_list )
 
     except:
         print traceback.format_exc()
