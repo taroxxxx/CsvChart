@@ -31,6 +31,14 @@ class Analysis( object ):
 
     def __init__( self, db_file_path, main_logger=None ):
 
+
+
+        self.chart_start_time = int( _lib.datetime_to_time( datetime.datetime( 2019,11,1 ) ) )
+        self.chart_end_time = int( _lib.datetime_to_time( datetime.datetime( 2020,12,3 ) ) )
+        self.interval_min = int( 60*24 ) # 1day
+
+
+
         self.db_file_path = db_file_path
         self.main_logger = logging if main_logger==None else main_logger # MonitorMain .main_logger
 
@@ -384,12 +392,8 @@ function drawChart() {{
         def ___dayly___():
             pass
 
-        chart_start_time = int( _lib.datetime_to_time( datetime.datetime( 2019,11,1 ) ) )
-        chart_end_time = int( _lib.datetime_to_time( datetime.datetime( 2020,10,9 ) ) )
-        interval_min = int( 60*24 ) # 1day
-
-        kwh_temp_datarow_list = get_datarow_list( chart_start_time, chart_end_time, interval_min, mode='kwh_temp' )
-        rain_sun_datarow_list = get_datarow_list( chart_start_time, chart_end_time, interval_min, mode='rain_sun' )
+        kwh_temp_datarow_list = get_datarow_list( self.chart_start_time, self.chart_end_time, self.interval_min, mode='kwh_temp' )
+        rain_sun_datarow_list = get_datarow_list( self.chart_start_time, self.chart_end_time, self.interval_min, mode='rain_sun' )
 
         fmt_dict_tmp = {
             'chart': 'AreaChart',
@@ -447,8 +451,14 @@ function drawChart() {{
         def ___avg_dayly___():
             pass
 
-        kwh_temp_datarow_list = get_datarow_list( chart_start_time, chart_end_time, interval_min, mode='avg_kwh_temp' )
-        #rain_sun_datarow_list = get_datarow_list( chart_start_time, chart_end_time, interval_min, mode='rain_sun' )
+        kwh_temp_datarow_list = get_datarow_list(
+            self.chart_start_time, self.chart_end_time, self.interval_min, mode='avg_kwh_temp'
+        )
+        """
+        rain_sun_datarow_list = get_datarow_list(
+            self.chart_start_time, self.chart_end_time, self.interval_min, mode='rain_sun'
+        )
+        """
 
         fmt_dict_tmp = {
             'chart': 'AreaChart',
@@ -506,12 +516,12 @@ function drawChart() {{
         def ___hourly___():
             pass
         """
-        chart_start_time = int( _lib.datetime_to_time( datetime.datetime( 2020,7,1 ) ) )
-        chart_end_time = int( _lib.datetime_to_time( datetime.datetime( 2020,8,31 ) ) )
-        interval_min = int( 60 ) # 1hour
+        self.chart_start_time = int( _lib.datetime_to_time( datetime.datetime( 2020,7,1 ) ) )
+        self.chart_end_time = int( _lib.datetime_to_time( datetime.datetime( 2020,8,31 ) ) )
+        self.interval_min = int( 60 ) # 1hour
 
-        kwh_temp_datarow_list = get_datarow_list( chart_start_time, chart_end_time, interval_min, mode='kwh_temp' )
-        rain_sun_datarow_list = get_datarow_list( chart_start_time, chart_end_time, interval_min, mode='rain_sun' )
+        kwh_temp_datarow_list = get_datarow_list( self.chart_start_time, self.chart_end_time, self.interval_min, mode='kwh_temp' )
+        rain_sun_datarow_list = get_datarow_list( self.chart_start_time, self.chart_end_time, self.interval_min, mode='rain_sun' )
 
         fmt_dict_tmp = {
             'chart': 'AreaChart',
@@ -598,4 +608,4 @@ if __name__ == '__main__':
     except:
 
         logging.error( traceback.format_exc() )
-        raw_input( '--- end ---' )
+    raw_input( '--- end ---' )
