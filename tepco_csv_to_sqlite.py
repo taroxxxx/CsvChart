@@ -51,11 +51,11 @@ if __name__ == '__main__':
     try:
 
         """
-        dayly: 2019/11 ~ 2020/8
+        dayly: 2019/11 ~ 2020/12
         hourly: 2020/7 ~ 2020/8
         """
-        year_list = [ 2020 ]
-        month_list = [ 10,11,12 ] #range( 1, 8+1, 1 )
+        year_list = [ 2021 ]
+        month_list = [ 1 ] #range( 1, 8+1, 1 )
         day_list = [ None ] #range( 1,31+1,1) #
 
         def update_tgt_time_kwh( db_file_path, tbl_name, tgt_time, kwh, mode ):

@@ -3,6 +3,8 @@
 
 """
 datalog.sqlite からチャートを作成
+
+datetime 指定が必要
 """
 
 import os
@@ -34,7 +36,7 @@ class Analysis( object ):
 
 
         self.chart_start_time = int( _lib.datetime_to_time( datetime.datetime( 2019,11,1 ) ) )
-        self.chart_end_time = int( _lib.datetime_to_time( datetime.datetime( 2020,12,3 ) ) )
+        self.chart_end_time = int( _lib.datetime_to_time( datetime.datetime( 2021,1,7 ) ) )
         self.interval_min = int( 60*24 ) # 1day
 
 
